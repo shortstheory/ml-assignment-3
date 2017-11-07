@@ -27,16 +27,16 @@ public class FileParse {
     class PosNegPair {
         int posOccurences;
         int negOccurences;
-        PosNegPair {
+        PosNegPair() {
             posOccurences = 0;
             negOccurences = 0;
         }
     }
 
     ArrayList<FileRating> fileRatingArrayList = new ArrayList<FileRating>();
-
+    HashMap<Integer, PosNegPair> globalMap;
     FileParse() {
-        HashMap<Integer, PosNegPair> globalMap = new HashMap<Integer, PosNegPair>();
+        globalMap = new HashMap<Integer, PosNegPair>();
         String vocabPath = testFolderPath + imdbVocab;
         String labelPath = testFolderPath + imdbLabel;
         try {
@@ -50,11 +50,11 @@ public class FileParse {
                 fileRating.movieRating = Integer.parseInt(words[0]);
                 for (int i = 1; i < words.length; i++) {
                     String[] keyValue = words[i].split(":");
-                    //figure out hashmap insertion
-//                    globalMap.put(Integer.parseInt(keyValue[0]), Integer.parseInt(keyValue[1]));
+
                     int key = Integer.parseInt(keyValue[0]);
                     int value = Integer.parseInt(keyValue[1]);
                     fileRating.wordMap.put(key, value);
+
                     if (!globalMap.containsKey(key)) {
                         PosNegPair pair = new PosNegPair();
                         globalMap.put(key, pair);
@@ -73,8 +73,20 @@ public class FileParse {
             System.out.println("Exception in: " + e.getMessage());
         }
     }
+
+    public static void printMap(Map mp) {
+        Iterator it = mp.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            PosNegPair p = (PosNegPair) pair.getValue();
+            System.out.println(pair.getKey() + " = " + "Pos: " + p.posOccurences + "Neg: " + p.negOccurences);
+            it.remove(); // avoids a ConcurrentModificationException
+        }
+    }
+
     public static void main(String[] args) {
         FileParse fileParse = new FileParse();
         System.out.println(fileParse.fileRatingArrayList.size());
+//        printMap(fileParse.globalMap);
     }
 }
