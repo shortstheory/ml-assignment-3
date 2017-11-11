@@ -15,6 +15,7 @@ public class FileParse {
     final private static String testFolderPath = "/home/nic/original-projects/ml3/aclImdb/";
     final private static String imdbLabel = "train/labeledBow.feat";
     final private static String imdbVocab = "imdb.vocab";
+    final private static String stopWordsPath = "stop_words.txt";
 
     public int posWords = 0;
     public int negWords = 0;
@@ -109,8 +110,40 @@ public class FileParse {
         }
     }
 
+    public void removeStopWords() {
+        try {
+            BufferedReader stopWordReader = new BufferedReader(new InputStreamReader(new FileInputStream(testFolderPath + stopWordsPath)));
+            BufferedReader vocabReader = new BufferedReader(new InputStreamReader(new FileInputStream(testFolderPath + imdbVocab)));
+            ArrayList<String> stopWordList = new ArrayList<String>();
+            ArrayList<String> vocabList = new ArrayList<String>();
+            ArrayList<Integer> deletedIndices = new ArrayList<Integer>();
+            String line;
+
+            while ((line = stopWordReader.readLine()) != null) {
+                stopWordList.add(line);
+            }
+            while ((line = vocabReader.readLine()) != null) {
+                vocabList.add(line);
+            }
+
+            for (int i = 0; i < stopWordList.size(); i++) {
+                int index = vocabList.indexOf(stopWordList.get(i));
+                if (index != -1) {
+                    deletedIndices.add(index);
+                }
+            }
+
+            for (int i = 0; i < deletedIndices.size(); i++) {
+                globalMap.remove(i);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public static void main(String[] args) {
         FileParse fileParse = new FileParse();
+        fileParse.removeStopWords();
 //        System.out.println(fileParse.fileRatingArrayList.size());
 //        printMap(fileParse.globalMap);
     }

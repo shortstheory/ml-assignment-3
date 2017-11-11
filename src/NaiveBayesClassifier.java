@@ -4,7 +4,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Created by nic on 7/11/17.
@@ -27,9 +26,14 @@ public class NaiveBayesClassifier {
 
     boolean binaryClassifier;
 
-    NaiveBayesClassifier(boolean isBinaryClassifier) {
+    NaiveBayesClassifier(boolean isBinaryClassifier, boolean removeStopWords) {
         binaryClassifier = isBinaryClassifier;
         fileParse = new FileParse();
+
+        if (removeStopWords) {
+            fileParse.removeStopWords();
+        }
+
         String testPath = testFolderPath + testLabel;
 
         try {
@@ -78,15 +82,16 @@ public class NaiveBayesClassifier {
             Integer val = (Integer) pair.getValue(); //number of occ of word in files
             //search for key in the global map
             FileParse.PosNegPair posNegPair = fileParse.globalMap.get(key);
-
-            int posOccurences = posNegPair.posOccurences;
-            int negOccurences = posNegPair.negOccurences;
-            if (binaryClassifier) {
-                posProbability +=  Math.log((double) (posOccurences + 1) / (fileParse.posWords + fileParse.totalWords));
-                negProbability += Math.log((double) (negOccurences + 1) / (fileParse.negWords + fileParse.totalWords));
-            } else {
-                posProbability +=  val*Math.log((double) (posOccurences + 1) / (fileParse.posWords + fileParse.totalWords));
-                negProbability += val*Math.log((double) (negOccurences + 1) / (fileParse.negWords + fileParse.totalWords));
+            if (posNegPair != null) {
+                int posOccurences = posNegPair.posOccurences;
+                int negOccurences = posNegPair.negOccurences;
+                if (binaryClassifier) {
+                    posProbability += Math.log((double) (posOccurences + 1) / (fileParse.posWords + fileParse.totalWords));
+                    negProbability += Math.log((double) (negOccurences + 1) / (fileParse.negWords + fileParse.totalWords));
+                } else {
+                    posProbability += val * Math.log((double) (posOccurences + 1) / (fileParse.posWords + fileParse.totalWords));
+                    negProbability += val * Math.log((double) (negOccurences + 1) / (fileParse.negWords + fileParse.totalWords));
+                }
             }
             it.remove();
         }
@@ -132,26 +137,33 @@ public class NaiveBayesClassifier {
         float negRecall = true_negative / (true_negative + false_positive);
         float negf1_score = 2 * (negPrecision*negRecall) / (negPrecision+negRecall);
 
-        System.out.println("+precision: " + posPrecision);
-        System.out.println("+recall: " + posRecall);
-        System.out.println("+f1_score: " + posf1_score);
+        System.out.println("Positive precision: " + posPrecision);
+        System.out.println("Positive recall: " + posRecall);
+        System.out.println("Positive F1 score: " + posf1_score);
 
-        System.out.println("-precision: " + negPrecision);
-        System.out.println("-recall: " + negRecall);
-        System.out.println("-f1_score: " + negf1_score);
+        System.out.println("Negative precision: " + negPrecision);
+        System.out.println("Negative recall: " + negRecall);
+        System.out.println("Negative F1 score: " + negf1_score);
     }
 
     public static void main(String[] args) {
-        NaiveBayesClassifier naiveBayesClassifier = new NaiveBayesClassifier(false);
+        System.out.println("Standard Naive Bayes Classifier\n-----------------");
+        NaiveBayesClassifier naiveBayesClassifier = new NaiveBayesClassifier(false, false);
         for (int i = 0; i < naiveBayesClassifier.fileRatingArrayList.size(); i++) {
             naiveBayesClassifier.classifyInstance(i);
         }
         naiveBayesClassifier.printResults();
-
-        NaiveBayesClassifier binaryNaiveBayesClassifier = new NaiveBayesClassifier(true);
+        System.out.println("\nBinary Naive Bayes Classifier\n-----------------");
+        NaiveBayesClassifier binaryNaiveBayesClassifier = new NaiveBayesClassifier(true, false);
         for (int i = 0; i < binaryNaiveBayesClassifier.fileRatingArrayList.size(); i++) {
             binaryNaiveBayesClassifier.classifyInstance(i);
         }
         binaryNaiveBayesClassifier.printResults();
+        System.out.println("\nNaive Bayes Classifier With Stop Words Removed\n-----------------");
+        NaiveBayesClassifier stopWordsNaiveBayesClassifier = new NaiveBayesClassifier(false, true);
+        for (int i = 0; i < stopWordsNaiveBayesClassifier.fileRatingArrayList.size(); i++) {
+            stopWordsNaiveBayesClassifier.classifyInstance(i);
+        }
+        stopWordsNaiveBayesClassifier.printResults();
     }
 }
