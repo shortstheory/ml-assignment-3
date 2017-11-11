@@ -42,8 +42,6 @@ public class FileParse {
     HashMap<Integer, PosNegPair> globalMap;
     FileParse() {
         globalMap = new HashMap<Integer, PosNegPair>();
-
-//        String vocabPath = testFolderPath + imdbVocab;
         String labelPath = testFolderPath + imdbLabel;
 
         try {

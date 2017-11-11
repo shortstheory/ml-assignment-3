@@ -16,7 +16,6 @@ public class NaiveBayesClassifier {
     final private static String imdbVocab = "imdb.vocab";
     ArrayList<FileRating> fileRatingArrayList;
 
-
     float positive = 0;
     float negative = 0;
     float true_positive = 0;
@@ -24,13 +23,12 @@ public class NaiveBayesClassifier {
     float false_positive = 0;
     float false_negative = 0;
 
-    float posCorrect = 0;
-    float posWrong = 0;
-    float negCorrect = 0;
-    float negWrong = 0;
-
     private FileParse fileParse;
-    NaiveBayesClassifier() {
+
+    boolean binaryClassifier;
+
+    NaiveBayesClassifier(boolean isBinaryClassifier) {
+        binaryClassifier = isBinaryClassifier;
         fileParse = new FileParse();
         String testPath = testFolderPath + testLabel;
 
@@ -54,16 +52,6 @@ public class NaiveBayesClassifier {
             }
         } catch (Exception e) {
             System.out.println("Exception in: " + e.getMessage());
-        }
-    }
-
-    public static void printMap(Map mp) {
-        Iterator it = mp.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            Integer val = (Integer) pair.getValue();
-            System.out.println(pair.getKey() + " = " + val);
-            it.remove(); // avoids a ConcurrentModificationException
         }
     }
 
@@ -93,9 +81,13 @@ public class NaiveBayesClassifier {
 
             int posOccurences = posNegPair.posOccurences;
             int negOccurences = posNegPair.negOccurences;
-//            System.out.println("KEY" + key + "VALUE" + val);
-            posProbability +=  Math.log((double) val*(posOccurences + 1) / (fileParse.posWords + fileParse.totalWords));
-            negProbability += Math.log((double) val*(negOccurences + 1) / (fileParse.negWords + fileParse.totalWords));
+            if (binaryClassifier) {
+                posProbability +=  Math.log((double) (posOccurences + 1) / (fileParse.posWords + fileParse.totalWords));
+                negProbability += Math.log((double) (negOccurences + 1) / (fileParse.negWords + fileParse.totalWords));
+            } else {
+                posProbability +=  val*Math.log((double) (posOccurences + 1) / (fileParse.posWords + fileParse.totalWords));
+                negProbability += val*Math.log((double) (negOccurences + 1) / (fileParse.negWords + fileParse.totalWords));
+            }
             it.remove();
         }
         posProbability += fileParse.priorPosLog;
@@ -122,45 +114,44 @@ public class NaiveBayesClassifier {
             false_positive++;
         }
 
-        if (actuallyGoodFilm) {
-            if (goodFilm) {
-                posCorrect++;
-            } else {
-                negWrong++;
-            }
+        if (goodFilm) {
+            return "Good movie!";
         } else {
-            if (!goodFilm) {
-                negCorrect++;
-            } else {
-                posWrong++;
-            }
+            return "Bad movie!";
         }
-
-        return null;
     }
 
     public void printResults() {
         float accuracy = (true_positive+true_negative) / (true_positive + false_negative + false_positive + true_negative);
-        float precision = true_positive / (true_positive + false_positive);
-        float recall = true_positive / positive;
-        float f1_score = 2 * (precision*recall) / (precision+recall);
 
-//        System.out.println("accuracy: " + accuracy);
-//        System.out.println("precision: " + precision);
-//        System.out.println("recall: " + recall);
-//        System.out.println("f1_score: " + f1_score);
+        float posPrecision = true_positive / (true_positive + false_positive);
+        float posRecall = true_positive / (true_positive + false_negative);
+        float posf1_score = 2 * (posPrecision*posRecall) / (posPrecision+posRecall);
 
-        float posPrecision = posCorrect / (posCorrect + posWrong);
-        float negPrecision = negCorrect / (negCorrect + negWrong);
-        System.out.println("Pos Precision " + posPrecision);
-        System.out.println("Neg Precision " + negPrecision);
+        float negPrecision = true_negative / (true_negative + false_negative);
+        float negRecall = true_negative / (true_negative + false_positive);
+        float negf1_score = 2 * (negPrecision*negRecall) / (negPrecision+negRecall);
+
+        System.out.println("+precision: " + posPrecision);
+        System.out.println("+recall: " + posRecall);
+        System.out.println("+f1_score: " + posf1_score);
+
+        System.out.println("-precision: " + negPrecision);
+        System.out.println("-recall: " + negRecall);
+        System.out.println("-f1_score: " + negf1_score);
     }
 
     public static void main(String[] args) {
-        NaiveBayesClassifier naiveBayesClassifier = new NaiveBayesClassifier();
+        NaiveBayesClassifier naiveBayesClassifier = new NaiveBayesClassifier(false);
         for (int i = 0; i < naiveBayesClassifier.fileRatingArrayList.size(); i++) {
             naiveBayesClassifier.classifyInstance(i);
         }
         naiveBayesClassifier.printResults();
+
+        NaiveBayesClassifier binaryNaiveBayesClassifier = new NaiveBayesClassifier(true);
+        for (int i = 0; i < binaryNaiveBayesClassifier.fileRatingArrayList.size(); i++) {
+            binaryNaiveBayesClassifier.classifyInstance(i);
+        }
+        binaryNaiveBayesClassifier.printResults();
     }
 }
