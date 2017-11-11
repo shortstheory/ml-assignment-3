@@ -144,6 +144,7 @@ public class NaiveBayesClassifier {
         System.out.println("Negative precision: " + negPrecision);
         System.out.println("Negative recall: " + negRecall);
         System.out.println("Negative F1 score: " + negf1_score);
+        System.out.println("Accuracy: " + accuracy);
     }
 
     public static void main(String[] args) {
