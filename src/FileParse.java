@@ -96,9 +96,6 @@ public class FileParse {
 
             priorPosLog = Math.log(priorPosProb);
             priorNegLog = Math.log(priorNegProb);
-
-            System.out.println("Pos" + priorPosProb);
-            System.out.println("Neg" + priorNegProb);
         } catch (Exception e) {
             System.out.println("Exception in: " + e.getMessage());
         }
