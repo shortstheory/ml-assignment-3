@@ -16,13 +16,18 @@ public class FileParse {
     final private static String imdbLabel = "train/labeledBow.feat";
     final private static String imdbVocab = "imdb.vocab";
 
-    class FileRating {
-        HashMap<Integer, Integer> wordMap;
-        int movieRating;
-        FileRating(){
-            wordMap = new HashMap<Integer, Integer>();
-        }
-    }
+    public int posWords = 0;
+    public int negWords = 0;
+    public int totalWords = 0;
+
+    public double priorPosProb;
+    public double priorNegProb;
+
+    public double priorPosLog;
+    public double priorNegLog;
+
+    private int posFileCount = 0;
+    private int negFileCount = 0;
 
     class PosNegPair {
         int posOccurences;
@@ -37,8 +42,10 @@ public class FileParse {
     HashMap<Integer, PosNegPair> globalMap;
     FileParse() {
         globalMap = new HashMap<Integer, PosNegPair>();
-        String vocabPath = testFolderPath + imdbVocab;
+
+//        String vocabPath = testFolderPath + imdbVocab;
         String labelPath = testFolderPath + imdbLabel;
+
         try {
             FileInputStream fileInputStream = new FileInputStream(labelPath);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
@@ -48,27 +55,50 @@ public class FileParse {
                 String[] words = line.split("\\s+");
                 FileRating fileRating = new FileRating();
                 fileRating.movieRating = Integer.parseInt(words[0]);
+
+                if (fileRating.movieRating >=7) {
+                    posWords += words.length -1;
+                    posFileCount++;
+                } else if (fileRating.movieRating <= 4) {
+                    negWords += words.length -1;
+                    negFileCount++;
+                }
+
                 for (int i = 1; i < words.length; i++) {
                     String[] keyValue = words[i].split(":");
 
                     int key = Integer.parseInt(keyValue[0]);
                     int value = Integer.parseInt(keyValue[1]);
+
                     fileRating.wordMap.put(key, value);
 
                     if (!globalMap.containsKey(key)) {
                         PosNegPair pair = new PosNegPair();
                         globalMap.put(key, pair);
                     }
+
                     PosNegPair occPair = globalMap.get(key);
+
                     if (fileRating.movieRating >= 7) {
                         occPair.posOccurences += value;
                     } else if (fileRating.movieRating <= 4) {
                         occPair.negOccurences += value;
                     }
+
                     globalMap.put(key, occPair);
                 }
                 fileRatingArrayList.add(fileRating);
             }
+            totalWords = posWords + negWords;
+
+            priorPosProb = (double) posWords / (totalWords);
+            priorNegProb = (double) negWords / (totalWords);
+
+            priorPosLog = Math.log(priorPosProb);
+            priorNegLog = Math.log(priorNegProb);
+
+            System.out.println("Pos" + priorPosProb);
+            System.out.println("Neg" + priorNegProb);
         } catch (Exception e) {
             System.out.println("Exception in: " + e.getMessage());
         }
@@ -86,7 +116,7 @@ public class FileParse {
 
     public static void main(String[] args) {
         FileParse fileParse = new FileParse();
-        System.out.println(fileParse.fileRatingArrayList.size());
+//        System.out.println(fileParse.fileRatingArrayList.size());
 //        printMap(fileParse.globalMap);
     }
 }
