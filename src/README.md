@@ -44,6 +44,8 @@ Accuracy: 0.82944
 
 Execution time: ```0m12.840s```
 
+### Explanantion
+
 In the output data, a positive value indicates if the movie was classified as a good movie (rating >= 7) and a negative value indicates if the movie was classified as a bad movie (rating <= 4). As per the requirements of the assignment, these values were calculated separately.
 
 As it can be seen from the output, all three classifiers have very similar results, with the best output coming from the Binary Naive Bayes Classifier in terms of precision and accuracy.
