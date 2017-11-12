@@ -47,3 +47,7 @@ Execution time: ```0m12.840s```
 In the output data, a positive value indicates if the movie was classified as a good movie (rating >= 7) and a negative value indicates if the movie was classified as a bad movie (rating <= 4). As per the requirements of the assignment, these values were calculated separately.
 
 As it can be seen from the output, all three classifiers have very similar results, with the best output coming from the Binary Naive Bayes Classifier in terms of precision and accuracy.
+
+Removing stop words slightly improves accuracy over the standard method as it removes all the commonly used words from the dataset. This reduces the chances of commonly used words in a classification of the training data influencing the results of classifying a file in the test file. However, as the incidence of commonly used words is almost the same in the positive and negative sets, the improvement from removing the stop words is not as high as it could be.
+
+The Binary Naive Bayes Classifier (BNBC) has superior results as it isn't influenced by how many times a word occurs in a file. For example, in a negative review of a movie may have the word "bad" or "terrible" in it several times. This heavily influences the file towards being a negative reivew even if it may be a positive review. However, in the BNBC approach a word is only counted once even it occurs multiple times in a file. This gives the classifier its name (**binary**).
