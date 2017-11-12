@@ -16,10 +16,9 @@ import java.util.*;
 public class FileParse {
 //    Define file paths for the input data
 
-    final private static String testFolderPath = "/home/nic/original-projects/ml3/aclImdb/";
-    final private static String imdbLabel = "train/labeledBow.feat";
-    final private static String imdbVocab = "imdb.vocab";
-    final private static String stopWordsPath = "stop_words.txt";
+    final private String trainingPath = getClass().getResource("labeledBowTrain.feat").getPath();
+    final private String imdbVocab = getClass().getResource("imdb.vocab").getPath();
+    final private String stopWordsPath = getClass().getResource("stop_words.txt").getPath();
 
     public int posWords = 0;
     public int negWords = 0;
@@ -55,10 +54,9 @@ public class FileParse {
 
     FileParse() {
         globalMap = new HashMap<Integer, PosNegPair>();
-        String labelPath = testFolderPath + imdbLabel;
 
         try {
-            FileInputStream fileInputStream = new FileInputStream(labelPath);
+            FileInputStream fileInputStream = new FileInputStream(trainingPath);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
 
             String line;
@@ -110,10 +108,12 @@ public class FileParse {
         }
     }
 
+//    Remove the stop words (commonly used words) from the NBC by deleting the key from the HashMap
+
     public void removeStopWords() {
         try {
-            BufferedReader stopWordReader = new BufferedReader(new InputStreamReader(new FileInputStream(testFolderPath + stopWordsPath)));
-            BufferedReader vocabReader = new BufferedReader(new InputStreamReader(new FileInputStream(testFolderPath + imdbVocab)));
+            BufferedReader stopWordReader = new BufferedReader(new InputStreamReader(new FileInputStream(stopWordsPath)));
+            BufferedReader vocabReader = new BufferedReader(new InputStreamReader(new FileInputStream(imdbVocab)));
             ArrayList<String> stopWordList = new ArrayList<String>();
             ArrayList<String> vocabList = new ArrayList<String>();
             ArrayList<Integer> deletedIndices = new ArrayList<Integer>();

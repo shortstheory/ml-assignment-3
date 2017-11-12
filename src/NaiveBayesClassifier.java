@@ -10,9 +10,9 @@ import java.util.Iterator;
  */
 
 public class NaiveBayesClassifier {
-    final private static String testFolderPath = "/home/nic/original-projects/ml3/aclImdb/";
-    final private static String testLabel = "test/labeledBow.feat";
-    final private static String imdbVocab = "imdb.vocab";
+//    final private static String testFolderPath = "/home/nic/original-projects/ml3/aclImdb/";
+    final private String testLabel = getClass().getResource("labeledBowTest.feat").getPath();
+    final private String imdbVocab = getClass().getResource("imdb.vocab").getPath();
     ArrayList<FileRating> fileRatingArrayList;
 
     float positive = 0;
@@ -39,10 +39,8 @@ public class NaiveBayesClassifier {
             fileParse.removeStopWords();
         }
 
-        String testPath = testFolderPath + testLabel;
-
         try {
-            FileInputStream fileInputStream = new FileInputStream(testPath);
+            FileInputStream fileInputStream = new FileInputStream(testLabel);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
             fileRatingArrayList = new ArrayList<FileRating>();
             String line;
@@ -94,7 +92,7 @@ public class NaiveBayesClassifier {
 
 //            We add the logarithm of the probabilities instead of multiplying it. Multiplying the probabilities can cause underflows.
 
-            if (posNegPair != null) {
+            if (posNegPair != null) { // if the word doesn't exist, we simply won't process it
                 int posOccurences = posNegPair.posOccurences;
                 int negOccurences = posNegPair.negOccurences;
 
