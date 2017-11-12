@@ -26,8 +26,13 @@ public class NaiveBayesClassifier {
 
     boolean binaryClassifier;
 
+//    Constructor takes arguments for whether binary classification should be applied or if stop words should be removed.
+
     NaiveBayesClassifier(boolean isBinaryClassifier, boolean removeStopWords) {
         binaryClassifier = isBinaryClassifier;
+
+//        Parses the training data and stores it in the HashMap data structure.
+
         fileParse = new FileParse();
 
         if (removeStopWords) {
@@ -41,13 +46,15 @@ public class NaiveBayesClassifier {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
             fileRatingArrayList = new ArrayList<FileRating>();
             String line;
+
+//            We store the number of times each word occurs in the test files along with its rating in an instance of the FileRating class
+
             while ((line = bufferedReader.readLine()) != null) {
                 String[] words = line.split("\\s+");
                 FileRating fileRating = new FileRating();
                 fileRating.movieRating = Integer.parseInt(words[0]);
                 for (int i = 1; i < words.length; i++) {
                     String[] keyValue = words[i].split(":");
-
                     int key = Integer.parseInt(keyValue[0]); //wordID
                     int value = Integer.parseInt(keyValue[1]); //value
                     fileRating.wordMap.put(key, value);
@@ -58,6 +65,8 @@ public class NaiveBayesClassifier {
             System.out.println("Exception in: " + e.getMessage());
         }
     }
+
+//    Takes the index of the file to be classified and returns whether the movie is good or bad
 
     public String classifyInstance(int i) { //gets file i
         float posProbability = 0;
@@ -82,9 +91,15 @@ public class NaiveBayesClassifier {
             Integer val = (Integer) pair.getValue(); //number of occ of word in files
             //search for key in the global map
             FileParse.PosNegPair posNegPair = fileParse.globalMap.get(key);
+
+//            We add the logarithm of the probabilities instead of multiplying it. Multiplying the probabilities can cause underflows.
+
             if (posNegPair != null) {
                 int posOccurences = posNegPair.posOccurences;
                 int negOccurences = posNegPair.negOccurences;
+
+//                In a binary classifier we only check if the word exists, and not how many times it occurs in the input file.
+
                 if (binaryClassifier) {
                     posProbability += Math.log((double) (posOccurences + 1) / (fileParse.posWords + fileParse.totalWords));
                     negProbability += Math.log((double) (negOccurences + 1) / (fileParse.negWords + fileParse.totalWords));
@@ -104,6 +119,8 @@ public class NaiveBayesClassifier {
         } else {
             goodFilm = false;
         }
+
+//        Stores statistics for calculating the precision, recall, and F1 score of the classifier
 
         if (actuallyGoodFilm && goodFilm) {
             positive++;

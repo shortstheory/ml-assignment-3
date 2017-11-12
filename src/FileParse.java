@@ -10,8 +10,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
+//Parses the input data labeledBow.feat to build a HashMap of the words, with key as the id of the word as according to
+//imdb.vocab and the value being the number of occurences of the word.
 
 public class FileParse {
+//    Define file paths for the input data
+
     final private static String testFolderPath = "/home/nic/original-projects/ml3/aclImdb/";
     final private static String imdbLabel = "train/labeledBow.feat";
     final private static String imdbVocab = "imdb.vocab";
@@ -30,6 +34,9 @@ public class FileParse {
     private int posFileCount = 0;
     private int negFileCount = 0;
 
+//    Inner class used for storing how many times a word occurs in a positve and negative context. This is used as the
+//    value in the member globalMap hashmap.
+
     class PosNegPair {
         int posOccurences;
         int negOccurences;
@@ -39,8 +46,13 @@ public class FileParse {
         }
     }
 
+//    Used for storing the number of occurences of each word and the rating for a given file.
+
     ArrayList<FileRating> fileRatingArrayList = new ArrayList<FileRating>();
     HashMap<Integer, PosNegPair> globalMap;
+
+//    We parse the file in the constructor of the FileParse class. This populates the HashMap
+
     FileParse() {
         globalMap = new HashMap<Integer, PosNegPair>();
         String labelPath = testFolderPath + imdbLabel;
@@ -52,13 +64,12 @@ public class FileParse {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 String[] words = line.split("\\s+");
-                FileRating fileRating = new FileRating();
-                fileRating.movieRating = Integer.parseInt(words[0]);
+                  int movieRating = Integer.parseInt(words[0]);
 
-                if (fileRating.movieRating >=7) {
+                if (movieRating >=7) {
                     posWords += words.length -1;
                     posFileCount++;
-                } else if (fileRating.movieRating <= 4) {
+                } else if (movieRating <= 4) {
                     negWords += words.length -1;
                     negFileCount++;
                 }
@@ -69,8 +80,6 @@ public class FileParse {
                     int key = Integer.parseInt(keyValue[0]);
                     int value = Integer.parseInt(keyValue[1]);
 
-                    fileRating.wordMap.put(key, value);
-
                     if (!globalMap.containsKey(key)) {
                         PosNegPair pair = new PosNegPair();
                         globalMap.put(key, pair);
@@ -78,35 +87,26 @@ public class FileParse {
 
                     PosNegPair occPair = globalMap.get(key);
 
-                    if (fileRating.movieRating >= 7) {
+                    if (movieRating >= 7) {
                         occPair.posOccurences += value;
-                    } else if (fileRating.movieRating <= 4) {
+                    } else if (movieRating <= 4) {
                         occPair.negOccurences += value;
                     }
 
                     globalMap.put(key, occPair);
                 }
-                fileRatingArrayList.add(fileRating);
             }
             totalWords = posWords + negWords;
 
             priorPosProb = (double) posWords / (totalWords);
             priorNegProb = (double) negWords / (totalWords);
 
+//            We compute log as this is needed for getting the probability of positive or negative occurences.
+
             priorPosLog = Math.log(priorPosProb);
             priorNegLog = Math.log(priorNegProb);
         } catch (Exception e) {
             System.out.println("Exception in: " + e.getMessage());
-        }
-    }
-
-    public static void printMap(Map mp) {
-        Iterator it = mp.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            PosNegPair p = (PosNegPair) pair.getValue();
-            System.out.println(pair.getKey() + " = " + "Pos: " + p.posOccurences + "Neg: " + p.negOccurences);
-            it.remove(); // avoids a ConcurrentModificationException
         }
     }
 
@@ -139,12 +139,5 @@ public class FileParse {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-    }
-
-    public static void main(String[] args) {
-        FileParse fileParse = new FileParse();
-        fileParse.removeStopWords();
-//        System.out.println(fileParse.fileRatingArrayList.size());
-//        printMap(fileParse.globalMap);
     }
 }
